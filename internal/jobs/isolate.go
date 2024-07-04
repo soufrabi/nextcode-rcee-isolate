@@ -69,16 +69,15 @@ func cleanup(boxId int) error {
 	return nil
 }
 
-func run(boxId int, req api.RunRequest, command string) error {
-	const stdoutFileName string = "stdout.txt"
-	const stderrFileName string = "stderr.txt"
+func run(boxId int, req api.RunRequest, command string, stdoutFileName string, stderrFileName string, metadataFileName string) error {
 	cmd := exec.Command(
 		isolateBinaryPath,
 		cgroupsFlag,
 		"-s",
-		"--run",
 		"-b",
 		fmt.Sprintf("%v", boxId),
+		"-M",
+		metadataFileName,
 		"-t",
 		fmt.Sprintf("%v", req.CpuTimeLimit),
 		"-x",
@@ -95,6 +94,7 @@ func run(boxId int, req api.RunRequest, command string) error {
 		stdoutFileName,
 		"-r",
 		stderrFileName,
+		"--run",
 		"--",
 		"/bin/sh",
 		"-c",
@@ -109,16 +109,26 @@ func run(boxId int, req api.RunRequest, command string) error {
 }
 
 func RunCode(request api.RunRequest) api.RunResponse {
+	var err error
+	var metadataTmpFile *os.File
+	metadataTmpFile, err = os.CreateTemp("", "metadata*.txt")
+	defer os.Remove(metadataTmpFile.Name())
+	slog.Debug("Metadata Temp File", "path", metadataTmpFile.Name())
+
 	const boxId int = 1
 	var (
-		workDir            string = path.Join(isolateVarDir, strconv.Itoa(boxId))
-		boxDir             string = path.Join(workDir, "box")
-		stdoutFileName     string = path.Join(boxDir, "stdout.txt")
-		stderrFileName     string = path.Join(boxDir, "stderr.txt")
-		sourceCodeFilePath string = path.Join(boxDir, "main.py")
-		stdoutFileContent  string
-		stderrFileContent  string
-		err                error
+		coreDir             string = path.Join(isolateVarDir, strconv.Itoa(boxId))
+		boxDir              string = path.Join(coreDir, "box")
+		stdoutFileName      string = "stdout.txt"
+		stderrFileName      string = "stderr.txt"
+		metadataFileName    string = metadataTmpFile.Name()
+		stdoutFilePath      string = path.Join(boxDir, stdoutFileName)
+		stderrFilePath      string = path.Join(boxDir, stderrFileName)
+		metadataFilePath    string = metadataFileName
+		sourceCodeFilePath  string = path.Join(boxDir, "main.py")
+		stdoutFileContent   string
+		stderrFileContent   string
+		metadataFileContent string
 	)
 
 	err = initialize(boxId)
@@ -140,9 +150,11 @@ func RunCode(request api.RunRequest) api.RunResponse {
 		}
 	}
 
-	run(boxId, request, "python main.py")
-	stdoutFileContent = getFileContent(stdoutFileName, 50)
-	stderrFileContent = getFileContent(stderrFileName, 50)
+	run(boxId, request, "python main.py", stdoutFileName, stderrFileName, metadataFileName)
+	stdoutFileContent = getFileContent(stdoutFilePath, 50)
+	stderrFileContent = getFileContent(stderrFilePath, 50)
+	metadataFileContent = getFileContent(metadataFilePath, 50)
+	slog.Info("Metadata file", "content", metadataFileContent)
 
 	res := api.RunResponse{
 		Stdout: stdoutFileContent,
