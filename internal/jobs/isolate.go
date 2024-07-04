@@ -69,10 +69,37 @@ func cleanup(boxId int) error {
 	return nil
 }
 
-func run(boxId int, processCountMax int, command string) error {
+func run(boxId int, req api.RunRequest, command string) error {
 	const stdoutFileName string = "stdout.txt"
 	const stderrFileName string = "stderr.txt"
-	cmd := exec.Command(isolateBinaryPath, "--run", cgroupsFlag, "-b", strconv.Itoa(boxId), fmt.Sprintf("-p%d", processCountMax), "-o", stdoutFileName, "-r", stderrFileName, "--", "/bin/sh", "-c", command)
+	cmd := exec.Command(
+		isolateBinaryPath,
+		cgroupsFlag,
+		"-s",
+		"--run",
+		"-b",
+		fmt.Sprintf("%v", boxId),
+		"-t",
+		fmt.Sprintf("%v", req.CpuTimeLimit),
+		"-x",
+		fmt.Sprintf("%v", req.CpuExtraTime),
+		"-w",
+		fmt.Sprintf("%v", req.WallTimeLimit),
+		fmt.Sprintf("-p%d", req.MaxProcessesAndOrThreads),
+		fmt.Sprintf("--cg-mem=%v", req.MemoryLimit),
+		"-k",
+		fmt.Sprintf("%v", req.StackLimit),
+		"-f",
+		fmt.Sprintf("%v", req.MaxFileSize),
+		"-o",
+		stdoutFileName,
+		"-r",
+		stderrFileName,
+		"--",
+		"/bin/sh",
+		"-c",
+		command,
+	)
 	if err := cmd.Run(); err != nil {
 		slog.Error("failed in run method", "err", err)
 		return err
@@ -109,7 +136,7 @@ func RunCode(request api.RunRequest) api.RunResponse {
 		}
 	}
 
-	run(boxId, 2, "python main.py")
+	run(boxId, request, "python main.py")
 	stdoutFileContent = getFileContent(stdoutFileName, 20)
 
 	res := api.RunResponse{
