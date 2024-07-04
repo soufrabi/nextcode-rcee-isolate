@@ -68,14 +68,16 @@ func cleanup(boxId int) error {
 	return nil
 }
 
-func run(boxId int, processCountMax int, command string) {
+func run(boxId int, processCountMax int, command string) error {
 	const stdoutFileName string = "stdout.txt"
 	const stderrFileName string = "stderr.txt"
 	cmd := exec.Command(isolateBinaryPath, "--run", cgroupsFlag, "-b", strconv.Itoa(boxId), fmt.Sprintf("-p%d", processCountMax), "-o", stdoutFileName, "-r", stderrFileName, "--", "/bin/sh", "-c", command)
 	if err := cmd.Run(); err != nil {
 		slog.Error("failed in run method", "err", err)
+		return err
 	}
 	slog.Info("run in isolate box", "boxId", boxId)
+	return nil
 }
 
 func RunCode() {
