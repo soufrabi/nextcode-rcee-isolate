@@ -2,6 +2,7 @@ package jobs
 
 import (
 	"fmt"
+	"git.soufrabi.com/nextcode/rcee-isolate/internal/api"
 	"io"
 	"log/slog"
 	"os"
@@ -80,31 +81,43 @@ func run(boxId int, processCountMax int, command string) error {
 	return nil
 }
 
-func RunCode() {
+func RunCode(request api.RunRequest) api.RunResponse {
 	const boxId int = 1
 	var workDir string = path.Join(isolateVarDir, strconv.Itoa(boxId))
 	var boxDir string = path.Join(workDir, "box")
 	var stdoutFileName string = path.Join(boxDir, "stdout.txt")
 	var sourceCodeFilePath string = path.Join(boxDir, "main.py")
 	var stdoutFileContent string
+	var err error
 
-	initialize(boxId)
-	var sourceCodeContent string = "print('Hello From Python')"
-	sourceCodeFile, err := os.Create(sourceCodeFilePath)
+	err = initialize(boxId)
+	defer cleanup(boxId)
 	if err != nil {
-		slog.Error("failed to create source code file")
-		return
+		return api.RunResponse{
+			Stdout: "",
+			Stderr: "",
+			Status: "INTERNAL_ERROR",
+		}
 	}
-	_, err = sourceCodeFile.WriteString(sourceCodeContent)
+
+	err = writeStringToFile(sourceCodeFilePath, request.SourceCode)
 	if err != nil {
-		slog.Error("failed to write to source code file")
-		return
+		return api.RunResponse{
+			Stdout: "",
+			Stderr: "",
+			Status: "INTERNAL_ERROR",
+		}
 	}
 
 	run(boxId, 2, "python main.py")
 	stdoutFileContent = getFileContent(stdoutFileName, 20)
-	slog.Info("Run Result", "stdout", stdoutFileContent)
 
-	cleanup(boxId)
+	res := api.RunResponse{
+		Stdout: stdoutFileContent,
+		Stderr: "",
+		Status: "",
+	}
+	slog.Debug("Run Result", "res", res)
+	return res
 
 }
