@@ -1,9 +1,9 @@
 package main
 
 import (
-    "git.soufrabi.com/nextcode/rcee-isolate/internal/jobs"
+    "git.soufrabi.com/nextcode/rcee-isolate/internal/web"
 )
 
 func main() {
-    jobs.RunCode()
+    web.SetupServer()
 }
