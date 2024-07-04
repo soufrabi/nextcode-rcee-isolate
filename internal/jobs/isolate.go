@@ -48,20 +48,24 @@ func getFileContent(filePath string, n int) string {
 	return string(buf)
 }
 
-func initialize(boxId int) {
+func initialize(boxId int) error {
 	cmd := exec.Command(isolateBinaryPath, "--init", cgroupsFlag, "-b", strconv.Itoa(boxId))
 	if err := cmd.Run(); err != nil {
 		slog.Error("failed in initialize method", "err", err)
+		return err
 	}
 	slog.Info("initialized isolate box", "boxId", boxId)
+	return nil
 }
 
-func cleanup(boxId int) {
+func cleanup(boxId int) error {
 	cmd := exec.Command(isolateBinaryPath, "--cleanup", cgroupsFlag, "-b", strconv.Itoa(boxId))
 	if err := cmd.Run(); err != nil {
 		slog.Error("failed in cleanup method", "err", err)
+		return err
 	}
 	slog.Info("cleaned isolate box", "boxId", boxId)
+	return nil
 }
 
 func run(boxId int, processCountMax int, command string) {
