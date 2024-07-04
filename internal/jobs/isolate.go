@@ -15,6 +15,21 @@ const isolateBinaryPath string = "/usr/local/bin/isolate"
 const cgroupsFlag string = "--cg"
 const stderrToStderrFlag string = "--stderr-to-stdout"
 
+func writeStringToFile(filePath string, content string) error {
+	file, err := os.Create(filePath)
+	if err != nil {
+		slog.Error("failed to create source code file")
+		return err
+	}
+	_, err = file.WriteString(content)
+	if err != nil {
+		slog.Error("failed to write to source code file")
+		return err
+	}
+
+	return nil
+
+}
 
 func getFileContent(filePath string, n int) string {
 	file, err := os.Open(filePath)
