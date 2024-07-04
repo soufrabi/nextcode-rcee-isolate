@@ -110,12 +110,16 @@ func run(boxId int, req api.RunRequest, command string) error {
 
 func RunCode(request api.RunRequest) api.RunResponse {
 	const boxId int = 1
-	var workDir string = path.Join(isolateVarDir, strconv.Itoa(boxId))
-	var boxDir string = path.Join(workDir, "box")
-	var stdoutFileName string = path.Join(boxDir, "stdout.txt")
-	var sourceCodeFilePath string = path.Join(boxDir, "main.py")
-	var stdoutFileContent string
-	var err error
+	var (
+		workDir            string = path.Join(isolateVarDir, strconv.Itoa(boxId))
+		boxDir             string = path.Join(workDir, "box")
+		stdoutFileName     string = path.Join(boxDir, "stdout.txt")
+		stderrFileName     string = path.Join(boxDir, "stderr.txt")
+		sourceCodeFilePath string = path.Join(boxDir, "main.py")
+		stdoutFileContent  string
+		stderrFileContent  string
+		err                error
+	)
 
 	err = initialize(boxId)
 	defer cleanup(boxId)
@@ -137,11 +141,12 @@ func RunCode(request api.RunRequest) api.RunResponse {
 	}
 
 	run(boxId, request, "python main.py")
-	stdoutFileContent = getFileContent(stdoutFileName, 20)
+	stdoutFileContent = getFileContent(stdoutFileName, 50)
+	stderrFileContent = getFileContent(stderrFileName, 50)
 
 	res := api.RunResponse{
 		Stdout: stdoutFileContent,
-		Stderr: "",
+		Stderr: stderrFileContent,
 		Status: "",
 	}
 	slog.Debug("Run Result", "res", res)
