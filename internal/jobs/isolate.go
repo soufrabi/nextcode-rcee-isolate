@@ -9,12 +9,34 @@ import (
 	"os/exec"
 	"path"
 	"strconv"
+	"strings"
 )
 
 const isolateVarDir string = "/var/local/lib/isolate"
 const isolateBinaryPath string = "/usr/local/bin/isolate"
 const cgroupsFlag string = "--cg"
 const stderrToStderrFlag string = "--stderr-to-stdout"
+
+func getMetadataMap(filePath string) map[string]string {
+	var m map[string]string
+	m = make(map[string]string)
+	var metadataFileContent string = getFileContent(filePath, 128)
+	var lines []string = strings.Split(metadataFileContent, "\n")
+	slog.Debug("Metadata Lines", "lines", lines)
+	for _, line := range lines {
+		slog.Debug("Metadata Line", "line", line)
+		var keyVal []string = strings.Split(line, ":")
+		if len(keyVal) == 2 {
+			var key string = keyVal[0]
+			var val string = keyVal[1]
+			if len(key) > 0 && len(val) > 0 {
+				m[key] = val
+			}
+		}
+	}
+
+	return m
+}
 
 func writeStringToFile(filePath string, content string) error {
 	file, err := os.Create(filePath)
