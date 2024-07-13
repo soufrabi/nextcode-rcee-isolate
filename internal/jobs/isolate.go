@@ -32,6 +32,10 @@ func writeStringToFile(filePath string, content string) error {
 
 }
 
+func convertMillisecondsToSecondsInString(n uint64) string {
+	return fmt.Sprintf("%d.%03d", n/1_000, n%1_000)
+}
+
 func getFileContent(filePath string, n int) string {
 	file, err := os.Open(filePath)
 	if err != nil {
