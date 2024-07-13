@@ -143,18 +143,18 @@ func RunCode(request api.RunRequest) api.RunResponse {
 
 	const boxId int = 1
 	var (
-		coreDir             string = path.Join(isolateVarDir, strconv.Itoa(boxId))
-		boxDir              string = path.Join(coreDir, "box")
-		stdoutFileName      string = "stdout.txt"
-		stderrFileName      string = "stderr.txt"
-		metadataFileName    string = metadataTmpFile.Name()
-		stdoutFilePath      string = path.Join(boxDir, stdoutFileName)
-		stderrFilePath      string = path.Join(boxDir, stderrFileName)
-		metadataFilePath    string = metadataFileName
-		sourceCodeFilePath  string = path.Join(boxDir, "main.py")
-		stdoutFileContent   string
-		stderrFileContent   string
-		metadataFileContent string
+		coreDir            string = path.Join(isolateVarDir, strconv.Itoa(boxId))
+		boxDir             string = path.Join(coreDir, "box")
+		stdoutFileName     string = "stdout.txt"
+		stderrFileName     string = "stderr.txt"
+		metadataFileName   string = metadataTmpFile.Name()
+		stdoutFilePath     string = path.Join(boxDir, stdoutFileName)
+		stderrFilePath     string = path.Join(boxDir, stderrFileName)
+		metadataFilePath   string = metadataFileName
+		sourceCodeFilePath string = path.Join(boxDir, "main.py")
+		stdoutFileContent  string
+		stderrFileContent  string
+		metadataMap        map[string]string
 	)
 
 	err = initialize(boxId)
@@ -179,8 +179,8 @@ func RunCode(request api.RunRequest) api.RunResponse {
 	run(boxId, request, "python main.py", stdoutFileName, stderrFileName, metadataFileName)
 	stdoutFileContent = getFileContent(stdoutFilePath, 50)
 	stderrFileContent = getFileContent(stderrFilePath, 50)
-	metadataFileContent = getFileContent(metadataFilePath, 50)
-	slog.Info("Metadata file", "content", metadataFileContent)
+	metadataMap = getMetadataMap(metadataFilePath)
+	slog.Info("Metadata Map", "content", metadataMap)
 
 	res := api.RunResponse{
 		Stdout: stdoutFileContent,
