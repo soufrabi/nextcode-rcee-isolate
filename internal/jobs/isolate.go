@@ -44,13 +44,13 @@ func getFileContent(filePath string, n int) string {
 	}
 	reader := io.Reader(file)
 	buf := make([]byte, n)
-	_, err = reader.Read(buf)
+	n, err = reader.Read(buf)
 	if err != nil {
 		slog.Error("failed to read file", "path", filePath, "err", err)
 		return ""
 	}
 
-	return string(buf)
+	return string(buf[:n])
 }
 
 func initialize(boxId int) error {
