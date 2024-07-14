@@ -12,8 +12,6 @@ import (
 	"strings"
 )
 
-const isolateVarDir string = "/var/local/lib/isolate"
-const isolateBinaryPath string = "/usr/local/bin/isolate"
 const cgroupsFlag string = "--cg"
 const stderrToStderrFlag string = "--stderr-to-stdout"
 
