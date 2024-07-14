@@ -175,8 +175,8 @@ func RunCode(request api.RunRequest) api.RunResponse {
 	}
 
 	run(boxId, request, "python main.py", stdoutFileName, stderrFileName, metadataFileName)
-	stdoutFileContent = getFileContent(stdoutFilePath, 50)
-	stderrFileContent = getFileContent(stderrFilePath, 50)
+	stdoutFileContent = getFileContent(stdoutFilePath, request.MaxFileSize)
+	stderrFileContent = getFileContent(stderrFilePath, request.MaxFileSize)
 	metadataMap = getMetadataMap(metadataFilePath)
 	slog.Info("Metadata Map", "content", metadataMap)
 
