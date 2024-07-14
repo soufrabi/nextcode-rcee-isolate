@@ -56,15 +56,15 @@ func convertMillisecondsToSecondsInString(n uint64) string {
 	return fmt.Sprintf("%d.%03d", n/1_000, n%1_000)
 }
 
-func getFileContent(filePath string, n int) string {
+func getFileContent(filePath string, maxBytes uint64) string {
 	file, err := os.Open(filePath)
 	if err != nil {
 		slog.Error("failed to open file", "path", filePath, "err", err)
 		return ""
 	}
 	reader := io.Reader(file)
-	buf := make([]byte, n)
-	n, err = reader.Read(buf)
+	buf := make([]byte, maxBytes)
+	n, err := reader.Read(buf)
 	if err != nil {
 		slog.Error("failed to read file", "path", filePath, "err", err)
 		return ""
