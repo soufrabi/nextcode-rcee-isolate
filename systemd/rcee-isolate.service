@@ -1,0 +1,14 @@
+[Unit]
+Description=Daemon to keep the rcee-isolate server up
+Documentation=https://nextcode.soufrabi.com
+After=network.target
+
+[Service]
+Environment=GO_ENV=production
+Type=simple
+User=rceeuser
+ExecStart=/usr/local/bin/rcee-isolate
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
