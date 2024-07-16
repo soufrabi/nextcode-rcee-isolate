@@ -18,6 +18,8 @@ func handleRun(c *gin.Context) {
 		return
 	}
 
+	slog.Debug("Run Request", "body", requestBody)
+
 	res := jobs.RunCode(requestBody)
 
 	c.JSON(http.StatusOK, res)
