@@ -1,6 +1,7 @@
 package api
 
 type RunRequest struct {
+	LanguageId               uint64 `json:"languageId"`
 	SourceCode               string `json:"sourceCode"`
 	Stdin                    string `json:"stdin"`
 	CpuTimeLimit             uint64 `json:"cpuTimeLimit"`
