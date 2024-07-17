@@ -132,6 +132,19 @@ func run(boxId int, req api.RunRequest, command string, stdoutFileName string, s
 	return nil
 }
 
+func generateErrorResponse(message string) api.RunResponse {
+	return api.RunResponse{
+		Stdout:   "",
+		Stderr:   "",
+		Status:   message,
+		ExitCode: "-1",
+		Time:     "0",
+		WallTime: "0",
+		Memory:   "0",
+	}
+
+}
+
 func RunCode(request api.RunRequest) api.RunResponse {
 	var err error
 	var metadataTmpFile *os.File
@@ -158,20 +171,12 @@ func RunCode(request api.RunRequest) api.RunResponse {
 	err = initialize(boxId)
 	defer cleanup(boxId)
 	if err != nil {
-		return api.RunResponse{
-			Stdout: "",
-			Stderr: "",
-			Status: "INTERNAL_ERROR",
-		}
+		return generateErrorResponse("INTERNAL ERROR")
 	}
 
 	err = writeStringToFile(sourceCodeFilePath, request.SourceCode)
 	if err != nil {
-		return api.RunResponse{
-			Stdout: "",
-			Stderr: "",
-			Status: "INTERNAL_ERROR",
-		}
+		return generateErrorResponse("INTERNAL ERROR")
 	}
 
 	run(boxId, request, "python main.py", stdoutFileName, stderrFileName, metadataFileName)
