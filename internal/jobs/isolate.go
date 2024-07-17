@@ -186,9 +186,13 @@ func RunCode(request api.RunRequest) api.RunResponse {
 	slog.Info("Metadata Map", "content", metadataMap)
 
 	res := api.RunResponse{
-		Stdout: stdoutFileContent,
-		Stderr: stderrFileContent,
-		Status: "",
+		Stdout:   stdoutFileContent,
+		Stderr:   stderrFileContent,
+		Status:   metadataMap["status"],
+		ExitCode: metadataMap["exitcode"],
+		Time:     metadataMap["time"],
+		WallTime: metadataMap["time-wall"],
+		Memory:   metadataMap["cg-mem"],
 	}
 	slog.Debug("Run Result", "res", res)
 	return res
