@@ -14,7 +14,11 @@ type RunRequest struct {
 }
 
 type RunResponse struct {
-	Stdout string `json:"stdout"`
-	Stderr string `json:"stderr"`
-	Status string `json:"status"`
+	Stdout   string `json:"stdout"`
+	Stderr   string `json:"stderr"`
+	Status   string `json:"status"`
+	ExitCode string `json:"exitCode"`
+	Time     string `json:"time"`
+	WallTime string `json:"wallTime"`
+	Memory   string `json:"memory"`
 }
