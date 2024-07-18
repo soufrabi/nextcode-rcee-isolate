@@ -203,7 +203,7 @@ func RunCode(request api.RunRequest) api.RunResponse {
 		WallTime: metadataMap["time-wall"],
 		Memory:   metadataMap["cg-mem"],
 	}
-	slog.Debug("Run Result", "res", res)
+
 	return res
 
 }

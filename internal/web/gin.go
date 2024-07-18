@@ -22,6 +22,8 @@ func handleRun(c *gin.Context) {
 
 	res := jobs.RunCode(requestBody)
 
+	slog.Debug("Run Result", "res", res)
+
 	c.JSON(http.StatusOK, res)
 
 }
