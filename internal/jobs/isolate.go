@@ -2,7 +2,6 @@ package jobs
 
 import (
 	"fmt"
-	"git.soufrabi.com/nextcode/rcee-isolate/internal/api"
 	"io"
 	"log/slog"
 	"os"
@@ -10,6 +9,9 @@ import (
 	"path"
 	"strconv"
 	"strings"
+
+	"git.soufrabi.com/nextcode/rcee-isolate/internal/api"
+	"git.soufrabi.com/nextcode/rcee-isolate/internal/proglang"
 )
 
 const cgroupsFlag string = "--cg"
@@ -146,6 +148,11 @@ func generateErrorResponse(message string) api.RunResponse {
 }
 
 func RunCode(request api.RunRequest) api.RunResponse {
+	language, ok := proglang.LangMap[request.LanguageId]
+	if !ok {
+		return generateErrorResponse("Unsupported Programming Language")
+	}
+
 	var err error
 	var metadataTmpFile *os.File
 	metadataTmpFile, err = os.CreateTemp("", "metadata*.txt")
@@ -162,7 +169,8 @@ func RunCode(request api.RunRequest) api.RunResponse {
 		stdoutFilePath     string = path.Join(boxDir, stdoutFileName)
 		stderrFilePath     string = path.Join(boxDir, stderrFileName)
 		metadataFilePath   string = metadataFileName
-		sourceCodeFilePath string = path.Join(boxDir, "main.py")
+		sourceCodeFileName string = fmt.Sprintf("main.%s", language.FileExtension)
+		sourceCodeFilePath string = path.Join(boxDir, sourceCodeFileName)
 		stdoutFileContent  string
 		stderrFileContent  string
 		metadataMap        map[string]string
@@ -179,7 +187,8 @@ func RunCode(request api.RunRequest) api.RunResponse {
 		return generateErrorResponse("INTERNAL ERROR")
 	}
 
-	run(boxId, request, "python main.py", stdoutFileName, stderrFileName, metadataFileName)
+	var command string = fmt.Sprintf("%s %s", language.InterpreterName, sourceCodeFileName)
+	run(boxId, request, command, stdoutFileName, stderrFileName, metadataFileName)
 	stdoutFileContent = getFileContent(stdoutFilePath, request.MaxFileSize)
 	stderrFileContent = getFileContent(stderrFilePath, request.MaxFileSize)
 	metadataMap = getMetadataMap(metadataFilePath)
